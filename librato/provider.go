@@ -3,7 +3,7 @@ package librato
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/henrikhodne/go-librato/librato"
+	"github.com/heroku/go-librato/librato"
 )
 
 // Provider returns a schema.Provider for Librato.

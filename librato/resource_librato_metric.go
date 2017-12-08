@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/henrikhodne/go-librato/librato"
+	"github.com/heroku/go-librato/librato"
 )
 
 func resourceLibratoMetric() *schema.Resource {
@@ -75,17 +75,15 @@ func resourceLibratoMetric() *schema.Resource {
 							Optional: true,
 							Default:  false,
 						},
-						"created_by_ua": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"gap_detection": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  false,
 						},
 						"aggregate": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  false,
 						},
 					},
 				},
@@ -115,40 +113,41 @@ func resourceLibratoMetricCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if a, ok := d.GetOk("attributes"); ok {
-
 		attributeData := a.([]interface{})
-		attributeDataMap := attributeData[0].(map[string]interface{})
-		attributes := new(librato.MetricAttributes)
 
-		if v, ok := attributeDataMap["color"].(string); ok && v != "" {
-			attributes.Color = librato.String(v)
-		}
-		if v, ok := attributeDataMap["display_max"].(string); ok && v != "" {
-			attributes.DisplayMax = librato.String(v)
-		}
-		if v, ok := attributeDataMap["display_min"].(string); ok && v != "" {
-			attributes.DisplayMin = librato.String(v)
-		}
-		if v, ok := attributeDataMap["display_units_long"].(string); ok && v != "" {
-			attributes.DisplayUnitsLong = *librato.String(v)
-		}
-		if v, ok := attributeDataMap["display_units_short"].(string); ok && v != "" {
-			attributes.DisplayUnitsShort = *librato.String(v)
-		}
-		if v, ok := attributeDataMap["created_by_ua"].(string); ok && v != "" {
-			attributes.CreatedByUA = *librato.String(v)
-		}
-		if v, ok := attributeDataMap["display_stacked"].(bool); ok {
-			attributes.DisplayStacked = *librato.Bool(v)
-		}
-		if v, ok := attributeDataMap["gap_detection"].(bool); ok {
-			attributes.GapDetection = *librato.Bool(v)
-		}
-		if v, ok := attributeDataMap["aggregate"].(bool); ok {
-			attributes.Aggregate = *librato.Bool(v)
-		}
+		// attributeData SHOULD be a list of length 1 if set. Don't
+		// even operate on it otherwise.
+		if len(attributeData) == 1 {
+			attributeDataMap := attributeData[0].(map[string]interface{})
+			attributes := new(librato.MetricAttributes)
 
-		metric.Attributes = attributes
+			if v, ok := attributeDataMap["color"].(string); ok && v != "" {
+				attributes.Color = librato.String(v)
+			}
+			if v, ok := attributeDataMap["display_max"].(string); ok && v != "" {
+				attributes.DisplayMax = librato.String(v)
+			}
+			if v, ok := attributeDataMap["display_min"].(string); ok && v != "" {
+				attributes.DisplayMin = librato.String(v)
+			}
+			if v, ok := attributeDataMap["display_units_long"].(string); ok && v != "" {
+				attributes.DisplayUnitsLong = librato.String(v)
+			}
+			if v, ok := attributeDataMap["display_units_short"].(string); ok && v != "" {
+				attributes.DisplayUnitsShort = librato.String(v)
+			}
+			if v, ok := extractBool(attributeDataMap, "display_stacked"); ok {
+				attributes.DisplayStacked = librato.Bool(v)
+			}
+			if v, ok := extractBool(attributeDataMap, "gap_detection"); ok {
+				attributes.GapDetection = librato.Bool(v)
+			}
+			if v, ok := extractBool(attributeDataMap, "aggregate"); ok {
+				attributes.Aggregate = librato.Bool(v)
+			}
+
+			metric.Attributes = attributes
+		}
 	}
 
 	_, err := client.Metrics.Update(&metric)
@@ -245,36 +244,41 @@ func resourceLibratoMetricUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 	if d.HasChange("attributes") {
 		attributeData := d.Get("attributes").([]interface{})
-		attributeDataMap := attributeData[0].(map[string]interface{})
 		attributes := new(librato.MetricAttributes)
 
-		if v, ok := attributeDataMap["color"].(string); ok && v != "" {
-			attributes.Color = librato.String(v)
+		// attributeData SHOULD be a list of length 1 if set. Don't
+		// even operate on it otherwise.
+		if len(attributeData) == 1 {
+			attributeDataMap := attributeData[0].(map[string]interface{})
+
+			if v, ok := attributeDataMap["color"].(string); ok && v != "" {
+				attributes.Color = librato.String(v)
+			}
+			if v, ok := attributeDataMap["display_max"].(string); ok && v != "" {
+				attributes.DisplayMax = librato.String(v)
+			}
+			if v, ok := attributeDataMap["display_min"].(string); ok && v != "" {
+				attributes.DisplayMin = librato.String(v)
+			}
+			if v, ok := attributeDataMap["display_units_long"].(string); ok && v != "" {
+				attributes.DisplayUnitsLong = librato.String(v)
+			}
+			if v, ok := attributeDataMap["display_units_short"].(string); ok && v != "" {
+				attributes.DisplayUnitsShort = librato.String(v)
+			}
+			if v, ok := extractBool(attributeDataMap, "display_stacked"); ok {
+				attributes.DisplayStacked = librato.Bool(v)
+			}
+			if v, ok := extractBool(attributeDataMap, "gap_detection"); ok {
+				attributes.GapDetection = librato.Bool(v)
+			}
+			if v, ok := extractBool(attributeDataMap, "aggregate"); ok {
+				attributes.Aggregate = librato.Bool(v)
+			}
 		}
-		if v, ok := attributeDataMap["display_max"].(string); ok && v != "" {
-			attributes.DisplayMax = librato.String(v)
-		}
-		if v, ok := attributeDataMap["display_min"].(string); ok && v != "" {
-			attributes.DisplayMin = librato.String(v)
-		}
-		if v, ok := attributeDataMap["display_units_long"].(string); ok && v != "" {
-			attributes.DisplayUnitsLong = *librato.String(v)
-		}
-		if v, ok := attributeDataMap["display_units_short"].(string); ok && v != "" {
-			attributes.DisplayUnitsShort = *librato.String(v)
-		}
-		if v, ok := attributeDataMap["created_by_ua"].(string); ok && v != "" {
-			attributes.CreatedByUA = *librato.String(v)
-		}
-		if v, ok := attributeDataMap["display_stacked"].(bool); ok {
-			attributes.DisplayStacked = *librato.Bool(v)
-		}
-		if v, ok := attributeDataMap["gap_detection"].(bool); ok {
-			attributes.GapDetection = *librato.Bool(v)
-		}
-		if v, ok := attributeDataMap["aggregate"].(bool); ok {
-			attributes.Aggregate = *librato.Bool(v)
-		}
+
+		// Continue assigning attributes, in the event we're emptying
+		// it out this will guarantee that it will be emptied out.
 		metric.Attributes = attributes
 	}
 
@@ -349,40 +353,54 @@ func resourceLibratoMetricDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 // Flattens an attributes hash into something that flatmap.Flatten() can handle
-func metricAttributesGather(d *schema.ResourceData, attributes *librato.MetricAttributes) []map[string]interface{} {
-	result := make([]map[string]interface{}, 0, 1)
+func metricAttributesGather(d *schema.ResourceData, attributes *librato.MetricAttributes) []interface{} {
+	retAttributes := make(map[string]interface{})
 
 	if attributes != nil {
-		retAttributes := make(map[string]interface{})
 		if attributes.Color != nil {
 			retAttributes["color"] = *attributes.Color
 		}
 		if attributes.DisplayMax != nil {
-			retAttributes["display_max"] = attributes.DisplayMax
+			retAttributes["display_max"] = fmt.Sprintf("%v", attributes.DisplayMax)
 		}
 		if attributes.DisplayMin != nil {
-			retAttributes["display_min"] = attributes.DisplayMin
+			retAttributes["display_min"] = fmt.Sprintf("%v", attributes.DisplayMin)
 		}
-		if attributes.DisplayUnitsLong != "" {
-			retAttributes["display_units_long"] = attributes.DisplayUnitsLong
+		if attributes.DisplayUnitsLong != nil {
+			retAttributes["display_units_long"] = *attributes.DisplayUnitsLong
 		}
-		if attributes.DisplayUnitsShort != "" {
-			retAttributes["display_units_short"] = attributes.DisplayUnitsShort
+		if attributes.DisplayUnitsShort != nil {
+			retAttributes["display_units_short"] = *attributes.DisplayUnitsShort
 		}
-		if attributes.CreatedByUA != "" {
-			retAttributes["created_by_ua"] = attributes.CreatedByUA
+		if attributes.DisplayStacked != nil {
+			retAttributes["display_stacked"] = *attributes.DisplayStacked
 		}
-		retAttributes["display_stacked"] = attributes.DisplayStacked || false
-		retAttributes["gap_detection"] = attributes.GapDetection || false
-		retAttributes["aggregate"] = attributes.Aggregate || false
-
-		result = append(result, retAttributes)
+		if attributes.GapDetection != nil {
+			retAttributes["gap_detection"] = *attributes.GapDetection
+		}
+		if attributes.Aggregate != nil {
+			retAttributes["aggregate"] = *attributes.Aggregate
+		}
 	}
 
-	return result
+	if len(retAttributes) == 0 {
+		return nil
+	}
+
+	return []interface{}{retAttributes}
 }
 
 func structToString(i interface{}) string {
 	s, _ := json.Marshal(i)
 	return string(s)
+}
+
+func extractBool(dict map[string]interface{}, key string) (v bool, ok bool) {
+	raw, ok := dict[key]
+	if !ok {
+		return false, false
+	}
+
+	b, ok := raw.(bool)
+	return b, ok
 }

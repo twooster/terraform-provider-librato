@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/henrikhodne/go-librato/librato"
+	"github.com/heroku/go-librato/librato"
 )
 
 func resourceLibratoAlert() *schema.Resource {

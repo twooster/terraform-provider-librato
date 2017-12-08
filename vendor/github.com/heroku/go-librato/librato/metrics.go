@@ -27,14 +27,14 @@ type MetricAttributes struct {
 	Color *string `json:"color"`
 	// These are interface{} because sometimes the Librato API
 	// returns strings, and sometimes it returns integers
-	DisplayMax        interface{} `json:"display_max"`
-	DisplayMin        interface{} `json:"display_min"`
-	DisplayUnitsLong  string      `json:"display_units_long"`
-	DisplayUnitsShort string      `json:"display_units_short"`
-	DisplayStacked    bool        `json:"display_stacked"`
-	CreatedByUA       string      `json:"created_by_ua,omitempty"`
-	GapDetection      bool        `json:"gap_detection,omitempty"`
-	Aggregate         bool        `json:"aggregate,omitempty"`
+	DisplayMax        interface{} `json:"display_max,omitempty"`
+	DisplayMin        interface{} `json:"display_min,omitempty"`
+	DisplayUnitsLong  *string     `json:"display_units_long,omitempty"`
+	DisplayUnitsShort *string     `json:"display_units_short,omitempty"`
+	DisplayStacked    *bool       `json:"display_stacked,omitempty"`
+	CreatedByUA       *string     `json:"created_by_ua,omitempty"`
+	GapDetection      *bool       `json:"gap_detection,omitempty"`
+	Aggregate         *bool       `json:"aggregate,omitempty"`
 }
 
 // ListMetricsOptions are used to coordinate paging of metrics.

@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/henrikhodne/go-librato/librato"
+	"github.com/heroku/go-librato/librato"
 )
 
 func TestAccLibratoSpaceChart_Basic(t *testing.T) {
