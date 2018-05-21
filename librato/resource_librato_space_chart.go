@@ -78,6 +78,7 @@ func resourceLibratoSpaceChart() *schema.Resource {
 						"composite": {
 							Type:          schema.TypeString,
 							Optional:      true,
+							Computed:      true,
 							ConflictsWith: []string{"stream.metric", "stream.source", "stream.group_function"},
 						},
 						"summary_function": {
