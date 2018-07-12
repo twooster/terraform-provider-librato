@@ -1,6 +1,9 @@
 package librato
 
 import (
+	"fmt"
+	"net/url"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/heroku/go-librato/librato"
@@ -10,6 +13,13 @@ import (
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
+			"url": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("LIBRATO_URL", nil),
+				Description: "The librato API URL to use for all requests.",
+			},
+
 			"email": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
@@ -38,7 +48,15 @@ func Provider() terraform.ResourceProvider {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	client := librato.NewClient(d.Get("email").(string), d.Get("token").(string))
+	email := d.Get("email").(string)
+	token := d.Get("token").(string)
 
-	return client, nil
+	if u := d.Get("url").(string); u != "" {
+		u, err := url.Parse(u)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to parse librato URL: %s", err)
+		}
+		return librato.NewClientWithBaseURL(u, email, token), nil
+	}
+	return librato.NewClient(email, token), nil
 }

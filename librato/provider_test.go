@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/heroku/go-librato/librato"
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -21,6 +22,49 @@ func init() {
 func TestProvider(t *testing.T) {
 	if err := Provider().(*schema.Provider).InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestProviderConfigureUsesDefaultBaseURLWhenNotSpecified(t *testing.T) {
+	p := Provider().(*schema.Provider)
+	d := schema.TestResourceDataRaw(t, p.Schema, nil)
+
+	client, err := providerConfigure(d)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	c := client.(*librato.Client)
+
+	if c.BaseURL.String() != "https://metrics-api.librato.com/v1/" {
+		t.Fatalf("want url: https://metrics-api.librato.com/v1/, got %q", c.BaseURL.String())
+	}
+}
+
+func TestProviderConfigureUsesCorrectURLEmailToken(t *testing.T) {
+	p := Provider().(*schema.Provider)
+	d := schema.TestResourceDataRaw(t, p.Schema, nil)
+	d.Set("url", "https://some-url.com/v1/")
+	d.Set("email", "foo@example.com")
+	d.Set("token", "the-token")
+
+	client, err := providerConfigure(d)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	c := client.(*librato.Client)
+
+	if c.BaseURL.String() != "https://some-url.com/v1/" {
+		t.Fatalf("want url: https://some-url.com/v1/, got %q", c.BaseURL.String())
+	}
+
+	if c.Email != "foo@example.com" {
+		t.Fatalf("want email: foo@example.com, got %q", c.Email)
+	}
+
+	if c.Token != "the-token" {
+		t.Fatalf("want token: the-token, got %q", c.Email)
 	}
 }
 
