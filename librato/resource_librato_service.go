@@ -21,10 +21,6 @@ func resourceLibratoService() *schema.Resource {
 		Delete: resourceLibratoServiceDelete,
 
 		Schema: map[string]*schema.Schema{
-			"id": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,

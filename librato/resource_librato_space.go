@@ -24,10 +24,6 @@ func resourceLibratoSpace() *schema.Resource {
 				Required: true,
 				ForceNew: false,
 			},
-			"id": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
 		},
 	}
 }
