@@ -32,7 +32,12 @@ $ make build
 
 Using the provider
 ----------------------
-## Fill in for each provider
+
+```sh
+export $GOPATH=...
+make install
+cp $GOPATH/bin/terraform-provider-librato ~/.terraform.d/plugins
+```
 
 Developing the Provider
 ---------------------------
