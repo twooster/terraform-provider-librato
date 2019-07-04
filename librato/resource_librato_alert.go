@@ -334,7 +334,8 @@ func resourceLibratoAlertConditionsGather(d *schema.ResourceData, conditions []l
 func resourceLibratoAlertAttributesGather(d *schema.ResourceData, attributes *librato.AlertAttributes) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0, 1)
 
-	if attributes != nil {
+	// Treat an empty hash of attributes as being identical to no attributes set at all.
+	if attributes != nil && attributes.RunbookURL != nil {
 		retAttributes := make(map[string]interface{})
 		if attributes.RunbookURL != nil {
 			retAttributes["runbook_url"] = *attributes.RunbookURL
@@ -404,16 +405,25 @@ func resourceLibratoAlertUpdate(d *schema.ResourceData, meta interface{}) error 
 		alert.Conditions = conditions
 	}
 	if d.HasChange("attributes") {
-		attributeData := d.Get("attributes").([]interface{})
-		if attributeData[0] == nil {
-			return fmt.Errorf("No attributes found in attributes block")
+		v, ok := d.GetOk("attributes")
+
+		// If no attributes are defined, just set to empty attributes.
+		if !ok {
+			attributes := new(librato.AlertAttributes)
+			attributes.RunbookURL = librato.String("")
+			alert.Attributes = attributes
+		} else {
+			attributeData := v.([]interface{})
+			if attributeData[0] == nil {
+				return fmt.Errorf("No attributes found in attributes block")
+			}
+			attributeDataMap := attributeData[0].(map[string]interface{})
+			attributes := new(librato.AlertAttributes)
+			if v, ok := attributeDataMap["runbook_url"].(string); ok && v != "" {
+				attributes.RunbookURL = librato.String(v)
+			}
+			alert.Attributes = attributes
 		}
-		attributeDataMap := attributeData[0].(map[string]interface{})
-		attributes := new(librato.AlertAttributes)
-		if v, ok := attributeDataMap["runbook_url"].(string); ok && v != "" {
-			attributes.RunbookURL = librato.String(v)
-		}
-		alert.Attributes = attributes
 	}
 
 	log.Printf("[INFO] Updating Librato alert: %s", alert)
