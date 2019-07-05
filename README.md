@@ -27,7 +27,7 @@ Using the provider
 
 ```sh
 export $GOPATH=%{GOPATH:-$HOME/go/bin}
-make install
+make build
 cp $GOPATH/bin/terraform-provider-librato ~/.terraform.d/plugins
 ```
 
