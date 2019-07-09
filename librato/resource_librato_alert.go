@@ -336,11 +336,9 @@ func resourceLibratoAlertAttributesGather(d *schema.ResourceData, attributes *li
 
 	// Treat an empty hash of attributes as being identical to no attributes set at all.
 	if attributes != nil && attributes.RunbookURL != nil {
-		retAttributes := make(map[string]interface{})
-		if attributes.RunbookURL != nil {
-			retAttributes["runbook_url"] = *attributes.RunbookURL
-		}
-		result = append(result, retAttributes)
+		result = append(result, map[string]interface{}{
+			"runbook_url": *attributes.RunbookURL,
+		})
 	}
 
 	return result
@@ -409,9 +407,9 @@ func resourceLibratoAlertUpdate(d *schema.ResourceData, meta interface{}) error 
 
 		// If no attributes are defined, just set to empty attributes.
 		if !ok {
-			attributes := new(librato.AlertAttributes)
-			attributes.RunbookURL = librato.String("")
-			alert.Attributes = attributes
+			alert.Attributes = &librato.AlertAttributes{
+				RunbookURL: librato.String(""),
+			}
 		} else {
 			attributeData := v.([]interface{})
 			if attributeData[0] == nil {
